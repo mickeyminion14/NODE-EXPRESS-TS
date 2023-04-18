@@ -23,12 +23,14 @@
     "compression": "^1.7.4",
     "express": "^4.18.2",
     "helmet": "^4.6.0",
+    "json-colorizer": "^2.2.2",
     "mongoose": "^7.0.3",
     "reflect-metadata": "^0.1.13",
     "swagger-express-ts": "^1.1.0",
     "swagger-ui-express": "^4.1.6",
     "ts-node-dev": "^2.0.0",
-    "tsconfig-paths": "^4.2.0"
+    "tsconfig-paths": "^4.2.0",
+    "winston": "^3.8.2"
   },
   "devDependencies": {
     "@types/compression": "^1.7.2",

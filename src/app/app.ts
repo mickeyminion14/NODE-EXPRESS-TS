@@ -2,6 +2,7 @@ import express from "express";
 import { NextFunction, Request, Response } from "express";
 import { apiRouter } from "./api/api.routes";
 import * as swagger from "swagger-express-ts";
+import { loggerMiddleWare } from "./utils/logger";
 const app = express();
 
 // Swagger Implementation Starts Here
@@ -26,6 +27,7 @@ app.use(
 
 // Swagger Implementation Ends Here
 
+app.use(loggerMiddleWare);
 app.use("/api/v1", apiRouter);
 
 app.use((req: Request, res: Response, next: NextFunction) => {

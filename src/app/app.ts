@@ -90,6 +90,7 @@ export class Application {
     this.instance.use((req: express.Request, res: express.Response) => {
       res.status(404).json({ message: "Not Found" });
     });
+    let a = 10;
   }
 
   initConfig() {

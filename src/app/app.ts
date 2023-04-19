@@ -6,7 +6,8 @@ import {Server} from 'http';
 import {loggerMiddleWare} from './middlewares/logger';
 import compression from 'compression';
 import helmet from 'helmet';
-
+import {mongoDAO} from './database/mongo.db';
+const config = require('config');
 const serverLogger = createNewLogger('server');
 export class Application {
   instance = express();
@@ -16,7 +17,7 @@ export class Application {
   }
 
   constructor() {
-    this.instance.set('port', 8080);
+    this.instance.set('port', config.port);
   }
   static init() {
     const app = new Application();
@@ -55,9 +56,7 @@ export class Application {
       server.close(async () => {
         serverLogger.info('Http server closed.');
         // Close All Database Connections
-        await Promise.all([
-          // mongoDAO.close(),
-        ]);
+        await Promise.all([mongoDAO.close()]);
         // close process
         process.exit(0);
       });
@@ -67,7 +66,7 @@ export class Application {
       .load()
       .then(() => {
         server.listen(app.port, () => {
-          serverLogger.info(`Swagger URL "${'config.url'}/api-docs/swagger"`);
+          serverLogger.info(`Swagger URL "${config.url}/api-docs/swagger"`);
         });
       })
       .catch((error) => {
@@ -81,9 +80,7 @@ export class Application {
     this.initConfig();
     this.instance.use('/api/v1', apiRouter);
 
-    await Promise.all([
-      // mongoDAO.connect(),
-    ]);
+    await Promise.all([mongoDAO.connect()]);
     // render app if no route matched
     this.instance.use((req: express.Request, res: express.Response) => {
       res.status(404).json({message: 'Not Found'});

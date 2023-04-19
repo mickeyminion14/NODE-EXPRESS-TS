@@ -62,3 +62,9 @@ typings/
 
 # build output folder
 dist/
+
+
+#config folder
+
+config
+environments

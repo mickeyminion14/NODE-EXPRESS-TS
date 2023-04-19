@@ -24,6 +24,7 @@
     "@types/compression": "^0.0.35",
     "@types/helmet": "^0.0.37",
     "compression": "^1.7.4",
+    "config": "^3.3.9",
     "express": "^4.18.2",
     "helmet": "^3.23.3",
     "json-colorizer": "^2.2.2",

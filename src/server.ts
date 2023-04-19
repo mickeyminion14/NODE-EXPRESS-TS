@@ -1,21 +1,25 @@
-import app from "./app/app";
-import compression from "compression";
-import helmet from "helmet";
-import { connect } from "mongoose";
-import { serverLogger } from "./app/utils/logger";
+// import app from "./app/app";
+// import compression from "compression";
+// import helmet from "helmet";
+// import { connect } from "mongoose";
 
-const DB_URL =
-  "mongodb+srv://devsarthakagrawal:sarthak12345@cluster0.bmkoglv.mongodb.net/?retryWrites=true&w=majority";
+import { Application } from "./app/app";
 
-app.use(helmet()); // set well-known security-related HTTP headers
-app.use(compression());
+// const DB_URL =
+//   "mongodb+srv://devsarthakagrawal:sarthak12345@cluster0.bmkoglv.mongodb.net/?retryWrites=true&w=majority";
 
-app.disable("x-powered-by");
+// // connect(DB_URL)
+// //   .then(() => {
+// //     app.listen(8080, () =>
+// //       serverLogger.info("Starting Express server on Port 8080")
+// //     );
+// //   })
+// //   .catch((err) => console.log(err));
 
-connect(DB_URL)
-  .then(() => {
-    app.listen(8080, () =>
-      serverLogger.info("Starting Express server on Port 8080")
-    );
-  })
-  .catch((err) => console.log(err));
+try {
+  // Initialize Application
+  Application.init();
+} catch (err: any) {
+  // Handle application errors with friendly messages
+  console.error(err.message);
+}

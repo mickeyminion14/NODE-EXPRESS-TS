@@ -1,37 +1,127 @@
 import express from "express";
-import { NextFunction, Request, Response } from "express";
 import { apiRouter } from "./api/api.routes";
 import * as swagger from "swagger-express-ts";
-import { loggerMiddleWare } from "./utils/logger";
-const app = express();
+import { createNewLogger } from "./utils/logger";
+import { Server } from "http";
+import { loggerMiddleWare } from "./middlewares/logger";
+import compression from "compression";
+import helmet from "helmet";
 
-// Swagger Implementation Starts Here
+const serverLogger = createNewLogger("server");
+export class Application {
+  instance = express();
 
-app.use("/api-docs/swagger", express.static("swagger"));
-app.use(
-  "/api-docs/swagger/assets",
-  express.static("node_modules/swagger-ui-dist")
-);
-app.use(
-  swagger.express({
-    definition: {
-      info: {
-        title: "My api",
-        version: "1.0",
-      },
-      basePath: "/api/v1",
-      schemes: ["http"],
-    },
-  })
-);
+  get port() {
+    return this.instance.get("port");
+  }
 
-// Swagger Implementation Ends Here
+  constructor() {
+    this.instance.set("port", 8080);
+  }
+  static init() {
+    const app = new Application();
+    const server = new Server(app.instance);
 
-app.use(loggerMiddleWare);
-app.use("/api/v1", apiRouter);
+    server.on("listening", () => {
+      const addr = server.address();
+      const bind =
+        typeof addr === "string" ? "pipe " + addr : "port " + addr!.port;
+      serverLogger.info("Listening on " + bind);
+    });
 
-app.use((req: Request, res: Response, next: NextFunction) => {
-  res.status(404).json({ message: "Not Found" });
-});
+    server.on("error", (error: any) => {
+      if (error.syscall !== "listen") {
+        throw error;
+      }
+      const bind: any =
+        typeof app.port === "string" ? "Pipe " + app.port : "Port " + app.port;
 
-export default app;
+      // handle specific listen errors with friendly messages
+      switch (error.code) {
+        case "EACCES":
+          serverLogger.error(bind + " requires elevated privileges");
+          process.exit(1);
+        // break;
+        case "EADDRINUSE":
+          serverLogger.error(bind + " is already in use");
+          process.exit(1);
+        // break;
+        default:
+          throw error;
+      }
+    });
+
+    process.on("SIGTERM", () => {
+      serverLogger.info("SIGTERM signal received.");
+      serverLogger.info("Closing http server.");
+      server.close(async () => {
+        serverLogger.info("Http server closed.");
+        // Close All Database Connections
+        await Promise.all([
+          // mongoDAO.close(),
+        ]);
+        // close process
+        process.exit(0);
+      });
+    });
+
+    app
+      .load()
+      .then(() => {
+        server.listen(app.port, () => {
+          serverLogger.info(`Swagger URL "${"config.url"}/api-docs/swagger"`);
+        });
+      })
+      .catch((error) => {
+        serverLogger.info(Object.keys(error));
+        serverLogger.error(error.message || "App Loading failed");
+        process.exit(1);
+      });
+  }
+
+  async load() {
+    this.initConfig();
+    this.instance.use("/api/v1", apiRouter);
+
+    await Promise.all([
+      // mongoDAO.connect(),
+    ]);
+    // render app if no route matched
+    this.instance.use((req: express.Request, res: express.Response) => {
+      res.status(404).json({ message: "Not Found" });
+    });
+  }
+
+  initConfig() {
+    //Initialize swagger
+    this.initSwagger();
+    //Logger Middleware
+    this.instance.use(loggerMiddleWare);
+    //Set well-known security-related HTTP headers
+    this.instance.use(helmet());
+    this.instance.use(compression());
+    this.instance.disable("x-powered-by");
+  }
+
+  initSwagger() {
+    /** Swagger Implementation Start  */
+    this.instance.use("/api-docs/swagger", express.static("swagger"));
+    this.instance.use(
+      "/api-docs/swagger/assets",
+      express.static("node_modules/swagger-ui-dist")
+    );
+    this.instance.use(
+      swagger.express({
+        definition: {
+          info: {
+            title: "My api",
+            version: "1.0",
+          },
+          basePath: "/api/v1",
+          schemes: ["http"],
+        },
+      })
+    );
+    /** Swagger Implementation Ends  */
+  }
+}

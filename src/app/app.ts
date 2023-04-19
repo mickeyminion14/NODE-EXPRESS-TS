@@ -1,49 +1,47 @@
-import express from "express";
-import { apiRouter } from "./api/api.routes";
-import * as swagger from "swagger-express-ts";
-import { createNewLogger } from "./utils/logger";
-import { Server } from "http";
-import { loggerMiddleWare } from "./middlewares/logger";
-import compression from "compression";
-import helmet from "helmet";
+import express from 'express';
+import {apiRouter} from './api/api.routes';
+import * as swagger from 'swagger-express-ts';
+import {createNewLogger} from './utils/logger';
+import {Server} from 'http';
+import {loggerMiddleWare} from './middlewares/logger';
+import compression from 'compression';
+import helmet from 'helmet';
 
-const serverLogger = createNewLogger("server");
+const serverLogger = createNewLogger('server');
 export class Application {
   instance = express();
 
   get port() {
-    return this.instance.get("port");
+    return this.instance.get('port');
   }
 
   constructor() {
-    this.instance.set("port", 8080);
+    this.instance.set('port', 8080);
   }
   static init() {
     const app = new Application();
     const server = new Server(app.instance);
 
-    server.on("listening", () => {
+    server.on('listening', () => {
       const addr = server.address();
-      const bind =
-        typeof addr === "string" ? "pipe " + addr : "port " + addr!.port;
-      serverLogger.info("Listening on " + bind);
+      const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr!.port;
+      serverLogger.info('Listening on ' + bind);
     });
 
-    server.on("error", (error: any) => {
-      if (error.syscall !== "listen") {
+    server.on('error', (error: any) => {
+      if (error.syscall !== 'listen') {
         throw error;
       }
-      const bind: any =
-        typeof app.port === "string" ? "Pipe " + app.port : "Port " + app.port;
+      const bind: any = typeof app.port === 'string' ? 'Pipe ' + app.port : 'Port ' + app.port;
 
       // handle specific listen errors with friendly messages
       switch (error.code) {
-        case "EACCES":
-          serverLogger.error(bind + " requires elevated privileges");
+        case 'EACCES':
+          serverLogger.error(bind + ' requires elevated privileges');
           process.exit(1);
         // break;
-        case "EADDRINUSE":
-          serverLogger.error(bind + " is already in use");
+        case 'EADDRINUSE':
+          serverLogger.error(bind + ' is already in use');
           process.exit(1);
         // break;
         default:
@@ -51,11 +49,11 @@ export class Application {
       }
     });
 
-    process.on("SIGTERM", () => {
-      serverLogger.info("SIGTERM signal received.");
-      serverLogger.info("Closing http server.");
+    process.on('SIGTERM', () => {
+      serverLogger.info('SIGTERM signal received.');
+      serverLogger.info('Closing http server.');
       server.close(async () => {
-        serverLogger.info("Http server closed.");
+        serverLogger.info('Http server closed.');
         // Close All Database Connections
         await Promise.all([
           // mongoDAO.close(),
@@ -69,28 +67,27 @@ export class Application {
       .load()
       .then(() => {
         server.listen(app.port, () => {
-          serverLogger.info(`Swagger URL "${"config.url"}/api-docs/swagger"`);
+          serverLogger.info(`Swagger URL "${'config.url'}/api-docs/swagger"`);
         });
       })
       .catch((error) => {
         serverLogger.info(Object.keys(error));
-        serverLogger.error(error.message || "App Loading failed");
+        serverLogger.error(error.message || 'App Loading failed');
         process.exit(1);
       });
   }
 
   async load() {
     this.initConfig();
-    this.instance.use("/api/v1", apiRouter);
+    this.instance.use('/api/v1', apiRouter);
 
     await Promise.all([
       // mongoDAO.connect(),
     ]);
     // render app if no route matched
     this.instance.use((req: express.Request, res: express.Response) => {
-      res.status(404).json({ message: "Not Found" });
+      res.status(404).json({message: 'Not Found'});
     });
-    let a = 10;
   }
 
   initConfig() {
@@ -101,26 +98,23 @@ export class Application {
     //Set well-known security-related HTTP headers
     this.instance.use(helmet());
     this.instance.use(compression());
-    this.instance.disable("x-powered-by");
+    this.instance.disable('x-powered-by');
   }
 
   initSwagger() {
     /** Swagger Implementation Start  */
-    this.instance.use("/api-docs/swagger", express.static("swagger"));
-    this.instance.use(
-      "/api-docs/swagger/assets",
-      express.static("node_modules/swagger-ui-dist")
-    );
+    this.instance.use('/api-docs/swagger', express.static('swagger'));
+    this.instance.use('/api-docs/swagger/assets', express.static('node_modules/swagger-ui-dist'));
     this.instance.use(
       swagger.express({
         definition: {
           info: {
-            title: "My api",
-            version: "1.0",
+            title: 'My api',
+            version: '1.0'
           },
-          basePath: "/api/v1",
-          schemes: ["http"],
-        },
+          basePath: '/api/v1',
+          schemes: ['http']
+        }
       })
     );
     /** Swagger Implementation Ends  */

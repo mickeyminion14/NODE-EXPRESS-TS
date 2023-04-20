@@ -1,5 +1,5 @@
-import { IUser } from "./user.interface";
-import { UserModel } from "./user.model";
+import {IUser} from './user.interface';
+import {UserModel} from './user.model';
 
 class UsersService {
   async getUsers() {

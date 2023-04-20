@@ -1,4 +1,4 @@
-import express from 'express';
+import express, {Request, Response} from 'express';
 import {apiRouter} from './api/api.routes';
 import * as swagger from 'swagger-express-ts';
 import {createNewLogger} from './utils/logger';
@@ -7,8 +7,11 @@ import {loggerMiddleWare} from './middlewares/logger';
 import compression from 'compression';
 import helmet from 'helmet';
 import {mongoDAO} from './database/mongo.db';
+import {apiMiddleware} from './middlewares/api';
+import {ResponseError} from './utils/error.util';
 const config = require('config');
 const serverLogger = createNewLogger('server');
+
 export class Application {
   instance = express();
 
@@ -82,12 +85,19 @@ export class Application {
 
     await Promise.all([mongoDAO.connect()]);
     // render app if no route matched
+    this.instance.use((err: ResponseError, req: Request, res: Response, next: express.NextFunction) => {
+      res.status(err.status || 400).json({message: err.message});
+      // res.error(new ResponseError(err.status, err.message));
+    });
     this.instance.use((req: express.Request, res: express.Response) => {
       res.status(404).json({message: 'Not Found'});
     });
   }
 
   initConfig() {
+    //Api Middleware
+
+    this.instance.use(apiMiddleware);
     //Initialize swagger
     this.initSwagger();
     //Logger Middleware

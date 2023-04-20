@@ -106,6 +106,8 @@ export class Application {
     this.instance.use(helmet());
     this.instance.use(compression());
     this.instance.disable('x-powered-by');
+    this.instance.use(express.json({limit: '50mb'}));
+    this.instance.use(express.urlencoded({extended: true, limit: '50mb'}));
   }
 
   initSwagger() {

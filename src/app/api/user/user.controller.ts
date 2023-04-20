@@ -1,6 +1,7 @@
 import {NextFunction, Request, Response} from 'express';
 import {ApiOperationGet, ApiOperationPost, ApiPath, SwaggerDefinitionConstant} from 'swagger-express-ts';
 import {usersService} from './user.service';
+import {serverLogger} from 'src/app/utils/logger';
 
 @ApiPath({
   path: '/users',
@@ -45,6 +46,7 @@ class UserController {
   })
   async registerUser(req: Request, res: Response, next: NextFunction) {
     const payload = req.body;
+    serverLogger.info(payload);
     usersService
       .registerUser(payload)
       .then((data) => res.status(200).json(data))

@@ -1,7 +1,7 @@
 import {NextFunction, Request, Response} from 'express';
 import {ResponseError} from '../utils/error.util';
-import {UserType} from '../api/constants/user.constants';
-import {Types} from 'mongoose';
+import {UserType} from '../constants/user.constants';
+import {Document, Types} from 'mongoose';
 
 export interface User {
   type: UserType;
@@ -12,6 +12,10 @@ export interface Client {
   agent: string;
   ipAddr: string;
   proxy: string;
+}
+
+export interface PasswordDoc extends Document {
+  password: string;
 }
 
 export type SuccessStatus = 200 | 201 | 202 | 204;

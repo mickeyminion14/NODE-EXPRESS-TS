@@ -4,13 +4,14 @@ import {ADMIN_MESSAGES} from './admin.constants';
 import {ApiOperationPost, ApiPath} from 'swagger-express-ts';
 
 @ApiPath({
-  path: '/admin/login',
+  path: '/admin',
   name: 'Admin'
 })
 class AdminController {
   @ApiOperationPost({
     description: 'Login Admin',
     summary: 'Login Admin',
+    path: '/login',
     parameters: {
       body: {
         description: 'Admin Login Data',

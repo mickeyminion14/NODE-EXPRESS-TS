@@ -6,7 +6,8 @@ import {Server} from 'http';
 import {loggerMiddleWare} from './middlewares/logger';
 import compression from 'compression';
 import helmet from 'helmet';
-import {mongoDAO} from './database/mongo.db';
+import cors from 'cors';
+import {mongoDAO} from './database/mongo/mongo.db';
 import {apiMiddleware} from './middlewares/api';
 import {ResponseError} from './utils/error.util';
 const config = require('config');
@@ -96,7 +97,9 @@ export class Application {
 
   initConfig() {
     //Api Middleware
-
+    if (process.env.NODE_ENV === 'development') {
+      this.instance.use(cors());
+    }
     this.instance.use(apiMiddleware);
     //Initialize swagger
     this.initSwagger();
@@ -112,6 +115,7 @@ export class Application {
 
   initSwagger() {
     /** Swagger Implementation Start  */
+
     this.instance.use('/api-docs/swagger', express.static('swagger'));
     this.instance.use('/api-docs/swagger/assets', express.static('node_modules/swagger-ui-dist'));
     this.instance.use(

@@ -27,5 +27,12 @@ export const passwordUtil = {
       const round: number = parseInt(config.salt_round + '', 10);
       this.password = await hash(password, await genSalt(round));
     }
+  },
+  async hookUser(this: any): Promise<void> {
+    const round: number = parseInt(config.SALT_ROUND, 10);
+    this.getUpdate().$setOnInsert.password = await hash(
+      this.getUpdate()['$setOnInsert'].password,
+      await genSalt(round)
+    );
   }
 };

@@ -1,5 +1,5 @@
 import {connect, set, ConnectOptions, connection} from 'mongoose';
-import {createNewLogger} from '../utils/logger';
+import {createNewLogger} from '../../utils/logger';
 
 const mongoLogger = createNewLogger('mongodb');
 const config = require('config');

@@ -16,7 +16,6 @@ class TokenUtil {
    */
   generateAuthToken(payload: {[key: string]: any}, userType: UserType, expiresIn?: number | string) {
     const authToken = config.secrets[userType].authToken;
-    console.log(authToken);
 
     const options: SignOptions = {};
     if (expiresIn) {
